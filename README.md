@@ -1,6 +1,6 @@
 # WLD-101
 
-Welcome! 🎉
+Welcome Vaquita! 🎉
 
 This repository provides a clear and straightforward template demonstrating how to build a Mini App using [World's Mini Apps](https://docs.world.org/mini-apps).
 
@@ -65,11 +65,13 @@ Add a strong, random string as your JWT secret for secure user sessions:
 JWT_SECRET=your_secure_random_string_at_least_32_chars_long
 
 This secret is used to:
+
 - Sign and verify JWT tokens for user authentication
 - Maintain persistent login sessions across page refreshes
 - Securely store user information between visits
 
 **Security Tips:**
+
 - Use a cryptographically strong random string (at least 32 characters)
 - Never expose this secret in client-side code
 - Consider rotating this secret periodically for enhanced security
