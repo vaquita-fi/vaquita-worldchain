@@ -1,5 +1,4 @@
 import { USDC_DECIMALS, VAQUITA_POOL_CONTRACT_ADDRESS } from '@/web3/config/constants';
-import { getPublicClient } from '@wagmi/core';
 import { useCallback } from 'react';
 import { v4 } from 'uuid';
 import { pad, toHex } from 'viem';
@@ -7,15 +6,15 @@ import { useWriteContract } from 'wagmi';
 import { ErrorTransaction, SuccessTransaction, Transaction } from '../types';
 import { useUSDC } from './useUSDC';
 import { useVaquitaPoolContract } from './useVaquitaPoolContract';
-import { useWagmiConfig } from './useWagmiConfig';
+// import { useWagmiConfig } from './useWagmiConfig';
 
 export const useVaquitaPool = () => {
   
   const { writeContractAsync } = useWriteContract();
   const contract = useVaquitaPoolContract();
-  const wagmiConfig = useWagmiConfig();
+  // const wagmiConfig = useWagmiConfig();
   
-  const client = getPublicClient(wagmiConfig);
+  // const client = getPublicClient(wagmiConfig);
   
   const { approveTokens } = useUSDC(VAQUITA_POOL_CONTRACT_ADDRESS);
   
@@ -44,15 +43,16 @@ export const useVaquitaPool = () => {
             bytes32Value,
             amount,
           ],
-          gas: 3000000n,
+          // gas: 3000000n,
         });
         console.info(`deposit sent, transactionHash: "${transactionHash}"`);
         
-        console.info(`wait for transaction receipt..., transactionHash: "${transactionHash}"`);
-        const receipt = await client.waitForTransactionReceipt({
-          hash: transactionHash,
-          confirmations: 1,
-        });
+        // console.info(`wait for transaction receipt..., transactionHash: "${transactionHash}"`);
+        // const receipt = await client.waitForTransactionReceipt({
+        //   hash: transactionHash,
+        //   confirmations: 1,
+        // });
+        const receipt = {};
         
         const result: SuccessTransaction = { success: true, error: null, transactionHash, receipt: receipt };
         console.info('deposited', { result });
@@ -88,11 +88,12 @@ export const useVaquitaPool = () => {
         });
         console.info(`withdraw sent, transactionHash: "${transactionHash}"`);
         
-        console.info(`wait for transaction receipt..., transactionHash: "${transactionHash}"`);
-        const receipt = await client.waitForTransactionReceipt({
-          hash: transactionHash,
-          confirmations: 1,
-        });
+        // console.info(`wait for transaction receipt..., transactionHash: "${transactionHash}"`);
+        // const receipt = await client.waitForTransactionReceipt({
+        //   hash: transactionHash,
+        //   confirmations: 1,
+        // });
+        const receipt = {};
         
         const result: SuccessTransaction = { success: true, error: null, transactionHash, receipt: receipt };
         console.info('withdrawn', { result });

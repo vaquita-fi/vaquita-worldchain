@@ -1,7 +1,7 @@
 import { ReactQueryProvider } from '@/app/react-query-provider';
 import MiniKitProvider from '@/components/minikit-provider';
 import NextAuthProvider from '@/components/next-auth-provider';
-import { Web3Provider } from '@/web3/wagmi-provider';
+import { Web3Provider } from '@/web3/chains/wagmi-provider';
 import { NextUIProvider } from '@nextui-org/react';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';

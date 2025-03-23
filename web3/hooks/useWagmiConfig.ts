@@ -1,14 +1,11 @@
 'use client';
 
 import { connectorsForWallets } from '@rainbow-me/rainbowkit';
-import {
-  coinbaseWallet,
-  metaMaskWallet,
-  rainbowWallet,
-} from '@rainbow-me/rainbowkit/wallets';
+import { coinbaseWallet, metaMaskWallet, rainbowWallet, walletConnectWallet } from '@rainbow-me/rainbowkit/wallets';
 import { useMemo } from 'react';
-import { http, createConfig } from 'wagmi';
+import { createConfig, http } from 'wagmi';
 import * as wagmiChains from 'wagmi/chains';
+import { mantle } from '../chains/mantle';
 import { PUBLIC_NETWORK, RPC_URL, WC_PROJECT_ID } from '../config/constants';
 import { getChainByName } from '../utils';
 
@@ -23,36 +20,37 @@ export function useWagmiConfig() {
       'To connect to all Wallets you need to provide a NEXT_PUBLIC_WC_PROJECT_ID env variable';
     throw new Error(providerErrMessage);
   }
-
+  
   return useMemo(() => {
     const connectors = connectorsForWallets(
       [
         {
           groupName: 'Recommended Wallet',
-          wallets: [coinbaseWallet],
+          wallets: [
+            metaMaskWallet,
+            rainbowWallet,
+            coinbaseWallet,
+            walletConnectWallet,
+          ],
         },
-        {
-          groupName: 'Other Wallets',
-          wallets: [rainbowWallet, metaMaskWallet],
-        }
       ],
       {
         appName: 'Vaquita',
         projectId,
       },
     );
-
+    
     const wagmiConfig = createConfig({
-      chains: [chain],
+      chains: [ mantle ],
       // turn off injected provider discovery
       multiInjectedProviderDiscovery: false,
       connectors,
       ssr: true,
       transports: {
-        [chain.id]: http(RPC_URL)
+        [mantle.id]: http(RPC_URL || 'https://rpc.mantle.xyz'),
       },
     });
-
+    
     return wagmiConfig;
-  }, [projectId]);
+  }, [ projectId ]);
 }

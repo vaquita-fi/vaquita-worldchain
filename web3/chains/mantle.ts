@@ -6,9 +6,9 @@ export const mantle = defineChain({
   name: 'Mantle',
   network: 'mantle',
   nativeCurrency: {
-    decimals: 18,
     name: 'Mantle',
     symbol: 'MNT',
+    decimals: 18,
   },
   rpcUrls: {
     default: {
@@ -16,6 +16,9 @@ export const mantle = defineChain({
     },
   },
   blockExplorers: {
-    default: { name: 'Mantle Explorer', url: 'https://explorer.mantle.xyz' },
+    default: {
+      name: 'Mantle Explorer',
+      url: 'https://explorer.mantle.xyz',
+    },
   },
 });
