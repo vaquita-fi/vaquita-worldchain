@@ -39,27 +39,6 @@ export const useVaquitaPool = () => {
         const deadline = Math.floor((Date.now() + 30 * 60 * 1000) / 1000).toString();
         
         // Create the permit transfer object
-        const permitTransfer = {
-          permitted: {
-            token: USDC_CONTRACT_ADDRESS,
-            amount: amount.toString,
-          },
-          nonce: Date.now().toString(),
-          deadline,
-        };
-
-        const permitTransferArgsForm = [
-          [permitTransfer.permitted.token, permitTransfer.permitted.amount],
-          permitTransfer.nonce,
-          permitTransfer.deadline,
-        ]
-      
-        const transferDetails = {
-          depositId: bytes32Value,
-          amount: amount.toString(),
-        }
-        
-        const transferDetailsArgsForm = [transferDetails.depositId, transferDetails.amount]
         
         console.info(`depositing..., amount: "${amount}", depositId: "${depositId}"`);
       
@@ -67,16 +46,24 @@ export const useVaquitaPool = () => {
         const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
           transaction: [
             {
-              address: VAQUITA_POOL_CONTRACT_ADDRESS,
+              address: String(VAQUITA_POOL_CONTRACT_ADDRESS),
               abi: contract.abi,
               functionName: 'deposit',
-              args: [permitTransferArgsForm, transferDetailsArgsForm, 'PERMIT2_SIGNATURE_PLACEHOLDER_0'],
+              args: [
+                String(bytes32Value), // Convert bytes32 to string
+                String(amount),       // Convert amount to string
+              ],
             },
           ],
           permit2: [
             {
-              ...permitTransfer,
-              spender: VAQUITA_POOL_CONTRACT_ADDRESS,
+              permitted: {
+                token: String(USDC_CONTRACT_ADDRESS),
+                amount: String(amount),
+              },
+              spender: String(VAQUITA_POOL_CONTRACT_ADDRESS),
+              nonce: String(Date.now()),
+              deadline: String(deadline),
             },
           ],
         });
