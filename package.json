@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clone-vaquita-ui-submodule": "cd vaquita-ui-submodule; git clone git@github.com:vaquita-fi/vaquita-ui-submodule.git ."
   },
   "dependencies": {
     "@worldcoin/mini-apps-ui-kit-react": "^0.0.6",
