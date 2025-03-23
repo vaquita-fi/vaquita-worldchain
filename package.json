@@ -10,16 +10,26 @@
     "clone-vaquita-ui-submodule": "cd vaquita-ui-submodule; git clone git@github.com:vaquita-fi/vaquita-ui-submodule.git ."
   },
   "dependencies": {
+    "@nextui-org/react": "^2.6.11",
+    "@tanstack/react-query": "^5.69.0",
+    "@wagmi/core": "^2.16.7",
     "@worldcoin/mini-apps-ui-kit-react": "^0.0.6",
     "@worldcoin/minikit-js": "1.6.1",
+    "date-fns": "^4.1.0",
     "eruda": "^3.2.3",
     "jose": "^6.0.10",
+    "multi-range-slider-react": "^2.0.7",
     "nanoid": "^5.1.4",
     "next": "14.2.6",
     "next-auth": "^4.24.7",
     "react": "^18",
+    "react-datepicker": "^8.2.1",
     "react-dom": "^18",
-    "viem": "^2.23.5"
+    "react-icons": "^5.5.0",
+    "sweetalert2": "^11.17.2",
+    "uuid": "^11.1.0",
+    "viem": "^2.23.14",
+    "wagmi": "^2.14.15"
   },
   "devDependencies": {
     "@types/node": "^20",
