@@ -1,60 +1,86 @@
-import { USDC_DECIMALS, VAQUITA_POOL_CONTRACT_ADDRESS } from '@/web3/config/constants';
+import { USDC_DECIMALS, VAQUITA_POOL_CONTRACT_ADDRESS, USDC_CONTRACT_ADDRESS } from '@/web3/config/constants';
 import { useCallback } from 'react';
 import { v4 } from 'uuid';
-import { pad, toHex } from 'viem';
-import { useWriteContract } from 'wagmi';
+import { MiniKit } from '@worldcoin/minikit-js';
+import type { MiniAppSendTransactionErrorPayload } from '@worldcoin/minikit-js';
 import { ErrorTransaction, SuccessTransaction, Transaction } from '../types';
-import { useUSDC } from './useUSDC';
 import { useVaquitaPoolContract } from './useVaquitaPoolContract';
-// import { useWagmiConfig } from './useWagmiConfig';
+
+// Extend the SuccessTransaction type to include depositId
+interface DepositSuccessTransaction extends SuccessTransaction {
+  depositId: `0x${string}`;
+}
 
 export const useVaquitaPool = () => {
-  
-  const { writeContractAsync } = useWriteContract();
   const contract = useVaquitaPoolContract();
-  // const wagmiConfig = useWagmiConfig();
-  
-  // const client = getPublicClient(wagmiConfig);
-  
-  const { approveTokens } = useUSDC(VAQUITA_POOL_CONTRACT_ADDRESS);
   
   const deposit = useCallback(
     async (_amount: number): Promise<Transaction> => {
-      
+      // Convert amount to the correct format with decimals
       const amount = BigInt(_amount) * BigInt(USDC_DECIMALS);
+      
+      // Generate a unique deposit ID
       const depositId = v4();
-      const uuidHex = depositId.replace(/-/g, '');
-      const uuidBytes = toHex(Buffer.from(uuidHex, 'hex'));
-      const bytes32Value = pad(uuidBytes, { size: 32 });
+      // Convert UUID to bytes32 format
+      const bytes32Value = `0x${depositId.replace(/-/g, '')}` as `0x${string}`;
       
       try {
-        const approved = await approveTokens(amount);
-        
-        if (approved.error) {
-          throw approved.error;
+        // Check if MiniKit is installed
+        if (!MiniKit.isInstalled()) {
+          throw new Error("MiniKit not installed");
         }
         
+        // Set up the permit2 deadline (30 minutes from now)
+        const deadline = Math.floor((Date.now() + 30 * 60 * 1000) / 1000).toString();
+        
+        // Create the permit transfer object
+        const permitTransfer = {
+          permitted: {
+            token: USDC_CONTRACT_ADDRESS,
+            amount: amount.toString(),
+          },
+          nonce: Date.now().toString(),
+          deadline,
+        };
+        
         console.info(`depositing..., amount: "${amount}", depositId: "${depositId}"`);
-        const transactionHash = await writeContractAsync({
-          address: VAQUITA_POOL_CONTRACT_ADDRESS,
-          abi: contract.abi,
-          functionName: 'deposit',
-          args: [
-            bytes32Value,
-            amount,
+        
+        // Use MiniKit's sendTransaction
+        const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
+          transaction: [
+            {
+              address: VAQUITA_POOL_CONTRACT_ADDRESS,
+              abi: contract.abi,
+              functionName: 'deposit',
+              args: [
+                bytes32Value,
+                amount.toString(),
+              ],
+            },
           ],
-          // gas: 3000000n,
+          permit2: [
+            {
+              ...permitTransfer,
+              spender: VAQUITA_POOL_CONTRACT_ADDRESS,
+            },
+          ],
         });
-        console.info(`deposit sent, transactionHash: "${transactionHash}"`);
         
-        // console.info(`wait for transaction receipt..., transactionHash: "${transactionHash}"`);
-        // const receipt = await client.waitForTransactionReceipt({
-        //   hash: transactionHash,
-        //   confirmations: 1,
-        // });
-        const receipt = {};
+        if (finalPayload.status === 'error') {
+          const errorPayload = finalPayload as MiniAppSendTransactionErrorPayload;
+          throw new Error(errorPayload.error_code || 'Transaction failed');
+        }
         
-        const result: SuccessTransaction = { success: true, error: null, transactionHash, receipt: receipt };
+        const transactionId = finalPayload.transaction_id;
+        console.info(`deposit sent, transactionId: "${transactionId}"`);
+        
+        const result: DepositSuccessTransaction = { 
+          success: true, 
+          error: null, 
+          transactionHash: transactionId as `0x${string}`, 
+          receipt: { transactionId },
+          depositId: bytes32Value 
+        };
         console.info('deposited', { result });
         
         return result;
@@ -69,33 +95,47 @@ export const useVaquitaPool = () => {
         return result;
       }
     },
-    [ approveTokens, writeContractAsync, contract.abi ],
+    [contract.abi],
   );
   
   const withdraw = useCallback(
     async (depositId: `0x${string}`): Promise<Transaction> => {
-      
       try {
+        // Check if MiniKit is installed
+        if (!MiniKit.isInstalled()) {
+          throw new Error("MiniKit not installed");
+        }
+        
         console.info(`withdrawing..., depositId: "${depositId}"`);
-        const transactionHash = await writeContractAsync({
-          address: VAQUITA_POOL_CONTRACT_ADDRESS,
-          abi: contract.abi,
-          functionName: 'withdraw',
-          args: [
-            depositId,
+        
+        // Use MiniKit's sendTransaction
+        const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
+          transaction: [
+            {
+              address: VAQUITA_POOL_CONTRACT_ADDRESS,
+              abi: contract.abi,
+              functionName: 'withdraw',
+              args: [
+                depositId,
+              ],
+            },
           ],
-          // gas: 3000000n,
         });
-        console.info(`withdraw sent, transactionHash: "${transactionHash}"`);
         
-        // console.info(`wait for transaction receipt..., transactionHash: "${transactionHash}"`);
-        // const receipt = await client.waitForTransactionReceipt({
-        //   hash: transactionHash,
-        //   confirmations: 1,
-        // });
-        const receipt = {};
+        if (finalPayload.status === 'error') {
+          const errorPayload = finalPayload as MiniAppSendTransactionErrorPayload;
+          throw new Error(errorPayload.error_code || 'Transaction failed');
+        }
         
-        const result: SuccessTransaction = { success: true, error: null, transactionHash, receipt: receipt };
+        const transactionId = finalPayload.transaction_id;
+        console.info(`withdraw sent, transactionId: "${transactionId}"`);
+        
+        const result: SuccessTransaction = { 
+          success: true, 
+          error: null, 
+          transactionHash: transactionId as `0x${string}`, 
+          receipt: { transactionId } 
+        };
         console.info('withdrawn', { result });
         
         return result;
@@ -110,7 +150,7 @@ export const useVaquitaPool = () => {
         return result;
       }
     },
-    [ approveTokens, writeContractAsync, contract.abi ],
+    [contract.abi],
   );
   
   return {

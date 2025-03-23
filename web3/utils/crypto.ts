@@ -2,6 +2,31 @@ import { type Hex } from 'viem';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getChainByName = (viemChains: any, chainName: string) => {
+  if (chainName === 'worldchain') {
+    return {
+      id: 480,
+      name: 'Worldchain',
+      nativeCurrency: {
+        name: 'Worldchain',
+        symbol: 'WLD',
+        decimals: 18,
+      },
+      rpcUrls: {
+        default: {
+          http: ['https://rpc.worldchain.com'],
+        },
+        public: {
+          http: ['https://rpc.worldchain.com'],
+        },
+      },
+      blockExplorers: {
+        default: {
+          name: 'Worldchain Explorer',
+          url: 'https://explorer.worldchain.com',
+        },
+      }
+    };
+  }
   if (chainName in viemChains) {
     return viemChains[chainName as keyof typeof viemChains];
   }
