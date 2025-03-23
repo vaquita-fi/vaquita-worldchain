@@ -47,9 +47,22 @@ export const useVaquitaPool = () => {
           nonce: Date.now().toString(),
           deadline,
         };
+
+        const permitTransferArgsForm = [
+          [permitTransfer.permitted.token, permitTransfer.permitted.amount],
+          permitTransfer.nonce,
+          permitTransfer.deadline,
+        ]
+      
+        const transferDetails = {
+          depositId: bytes32Value,
+          amount: amount.toString(),
+        }
+        
+        const transferDetailsArgsForm = [transferDetails.depositId, transferDetails.amount]
         
         console.info(`depositing..., amount: "${amount}", depositId: "${depositId}"`);
-        
+      
         // Use MiniKit's sendTransaction
         const { finalPayload } = await MiniKit.commandsAsync.sendTransaction({
           transaction: [
@@ -57,10 +70,7 @@ export const useVaquitaPool = () => {
               address: VAQUITA_POOL_CONTRACT_ADDRESS,
               abi: contract.abi,
               functionName: 'deposit',
-              args: [
-                bytes32Value,
-                amount,
-              ],
+              args: [permitTransferArgsForm, transferDetailsArgsForm, 'PERMIT2_SIGNATURE_PLACEHOLDER_0'],
             },
           ],
           permit2: [
