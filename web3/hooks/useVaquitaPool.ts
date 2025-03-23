@@ -1,8 +1,9 @@
-import { USDC_DECIMALS, VAQUITA_POOL_CONTRACT_ADDRESS, USDC_CONTRACT_ADDRESS } from '@/web3/config/constants';
+import { USDC_CONTRACT_ADDRESS, USDC_DECIMALS, VAQUITA_POOL_CONTRACT_ADDRESS } from '@/web3/config/constants';
+import type { MiniAppSendTransactionErrorPayload } from '@worldcoin/minikit-js';
+import { MiniKit } from '@worldcoin/minikit-js';
 import { useCallback } from 'react';
 import { v4 } from 'uuid';
-import { MiniKit } from '@worldcoin/minikit-js';
-import type { MiniAppSendTransactionErrorPayload } from '@worldcoin/minikit-js';
+import { pad, toHex } from 'viem';
 import { ErrorTransaction, SuccessTransaction, Transaction } from '../types';
 import { useVaquitaPoolContract } from './useVaquitaPoolContract';
 
@@ -22,12 +23,16 @@ export const useVaquitaPool = () => {
       // Generate a unique deposit ID
       const depositId = v4();
       // Convert UUID to bytes32 format
-      const bytes32Value = `0x${depositId.replace(/-/g, '')}` as `0x${string}`;
+      const uuidHex = depositId.replace(/-/g, '');
+      const uuidBytes = toHex(Buffer.from(uuidHex, 'hex'));
+      const bytes32Value = pad(uuidBytes, { size: 32 });
+      // const bytes32Value = `0x${depositId.replace(/-/g, '')}` as `0x${string}`;
       
+      console.log({ bytes32Value });
       try {
         // Check if MiniKit is installed
         if (!MiniKit.isInstalled()) {
-          throw new Error("MiniKit not installed");
+          throw new Error('MiniKit not installed');
         }
         
         // Set up the permit2 deadline (30 minutes from now)
@@ -74,12 +79,12 @@ export const useVaquitaPool = () => {
         const transactionId = finalPayload.transaction_id;
         console.info(`deposit sent, transactionId: "${transactionId}"`);
         
-        const result: DepositSuccessTransaction = { 
-          success: true, 
-          error: null, 
-          transactionHash: transactionId as `0x${string}`, 
+        const result: DepositSuccessTransaction = {
+          success: true,
+          error: null,
+          transactionHash: transactionId as `0x${string}`,
           receipt: { transactionId },
-          depositId: bytes32Value 
+          depositId: bytes32Value,
         };
         console.info('deposited', { result });
         
@@ -95,7 +100,7 @@ export const useVaquitaPool = () => {
         return result;
       }
     },
-    [contract.abi],
+    [ contract.abi ],
   );
   
   const withdraw = useCallback(
@@ -103,7 +108,7 @@ export const useVaquitaPool = () => {
       try {
         // Check if MiniKit is installed
         if (!MiniKit.isInstalled()) {
-          throw new Error("MiniKit not installed");
+          throw new Error('MiniKit not installed');
         }
         
         console.info(`withdrawing..., depositId: "${depositId}"`);
@@ -130,11 +135,11 @@ export const useVaquitaPool = () => {
         const transactionId = finalPayload.transaction_id;
         console.info(`withdraw sent, transactionId: "${transactionId}"`);
         
-        const result: SuccessTransaction = { 
-          success: true, 
-          error: null, 
-          transactionHash: transactionId as `0x${string}`, 
-          receipt: { transactionId } 
+        const result: SuccessTransaction = {
+          success: true,
+          error: null,
+          transactionHash: transactionId as `0x${string}`,
+          receipt: { transactionId },
         };
         console.info('withdrawn', { result });
         
@@ -150,7 +155,7 @@ export const useVaquitaPool = () => {
         return result;
       }
     },
-    [contract.abi],
+    [ contract.abi ],
   );
   
   return {
