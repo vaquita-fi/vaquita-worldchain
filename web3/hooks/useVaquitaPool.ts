@@ -42,7 +42,7 @@ export const useVaquitaPool = () => {
         const permitTransfer = {
           permitted: {
             token: USDC_CONTRACT_ADDRESS,
-            amount: amount.toString(),
+            amount: amount.toString,
           },
           nonce: Date.now().toString(),
           deadline,
@@ -59,7 +59,7 @@ export const useVaquitaPool = () => {
               functionName: 'deposit',
               args: [
                 bytes32Value,
-                amount.toString(),
+                amount,
               ],
             },
           ],
