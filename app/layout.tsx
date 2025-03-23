@@ -1,16 +1,23 @@
 import { ReactQueryProvider } from '@/app/react-query-provider';
 import MiniKitProvider from '@/components/minikit-provider';
-import NextAuthProvider from '@/components/next-auth-provider';
 import { Web3Provider } from '@/web3/chains/wagmi-provider';
 import { NextUIProvider } from '@nextui-org/react';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import { Sora } from 'next/font/google';
 import './commons.css';
 import './globals.css';
 import '@worldcoin/mini-apps-ui-kit-react/styles.css';
+// import '@coinbase/onchainkit/styles.css';
+import '@rainbow-me/rainbowkit/styles.css';
+import 'react-datepicker/dist/react-datepicker.css';
+import 'sweetalert2/src/sweetalert2.scss';
 
-const sora = Sora({ subsets: [ 'latin' ] });
+const OnchainProviders = dynamic(
+  () => import('../components/OnchainProviders'),
+  {
+    ssr: false,
+  },
+);
 
 export const metadata: Metadata = {
   title: 'Vaquita',
@@ -38,10 +45,11 @@ export default function Layout({
         rel="stylesheet"
       />
     </head>
-    <body className={sora.className}>
+    <body>
     <NextUIProvider className="h-full">
       <ReactQueryProvider>
-        <NextAuthProvider>
+        {/*<NextAuthProvider>*/}
+        <OnchainProviders>
           <ErudaProvider>
             <MiniKitProvider>
               <Web3Provider>
@@ -49,7 +57,8 @@ export default function Layout({
               </Web3Provider>
             </MiniKitProvider>
           </ErudaProvider>
-        </NextAuthProvider>
+        </OnchainProviders>
+        {/*</NextAuthProvider>*/}
       </ReactQueryProvider>
     </NextUIProvider>
     </body>

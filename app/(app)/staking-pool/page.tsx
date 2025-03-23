@@ -2,6 +2,7 @@
 
 import { MainHeader } from '@/vaquita-ui-submodule/components';
 import StakingPool from '@/vaquita-ui-submodule/components/StakingPool/page';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { motion } from 'framer-motion';
 import React from 'react';
 
@@ -22,6 +23,7 @@ const Page = () => {
         walletButtons={
           <>
             <button>header 1</button>
+            <ConnectButton showBalance={false} />
           </>
         }
       />
